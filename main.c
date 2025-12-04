@@ -13,7 +13,8 @@ int get_int(const char *msg){
         memset(buffer1,0,BUFFER_SIZE);
         memset(buffer2,0,BUFFER_SIZE);
         puts(msg);
-        scanf("%s",buffer1);
+        fgets(buffer1,BUFFER_SIZE,stdin);
+        buffer1[strcspn(buffer1, "\n")] = 0;
         result=atoi(buffer1);
         snprintf(buffer2,BUFFER_SIZE,"%i",result);
         isEqual=strcmp(buffer1,buffer2)==0;
