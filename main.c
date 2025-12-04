@@ -26,36 +26,36 @@ int get_int(const char *msg){
     return result;
 }
 
-float get_float(const char *msg){
+double get_double(const char *msg){
     const int BUFFER_SIZE = 100;
-    bool isFloat;
+    bool isDouble;
     int i;
     
-    float result;
+    double result;
     char buffer[BUFFER_SIZE];
     do{
-        isFloat = true;
+        isDouble = true;
         memset(buffer,0,BUFFER_SIZE);
         puts(msg);
         fgets(buffer,BUFFER_SIZE,stdin);
         buffer[strcspn(buffer, "\n")] = 0;
         for (i=BUFFER_SIZE-1;i>=0;--i)
             if (!isdigit(buffer[i]) && buffer[i]!='.' && buffer[i]!=0 && buffer[i]!='-'){
-                isFloat = false;
+                isDouble = false;
                 puts("Klaida");
                 break;
             }
     }
-    while(!isFloat);
+    while(!isDouble);
     result = atof(buffer);
     return result;
 }
 
 int main(){
-    float first_number,second_number;
-    first_number=get_float("Iveskite pirma skaiciu");
-    second_number=get_float("Iveskite antra skaiciu");
-    const float sum = first_number + second_number;
+    double first_number,second_number;
+    first_number=get_double("Iveskite pirma skaiciu");
+    second_number=get_double("Iveskite antra skaiciu");
+    const double sum = first_number + second_number;
     printf("%s%f\n","suma ",sum);
     return 0;
 }
