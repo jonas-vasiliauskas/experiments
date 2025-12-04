@@ -2,6 +2,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <stdbool.h>
+#include <ctype.h>
 
 int get_int(const char *msg){
     const int BUFFER_SIZE =  100;
@@ -25,11 +26,36 @@ int get_int(const char *msg){
     return result;
 }
 
+float get_float(const char *msg){
+    const int BUFFER_SIZE = 100;
+    bool isFloat;
+    int i;
+    
+    float result;
+    char buffer[BUFFER_SIZE];
+    do{
+        isFloat = true;
+        memset(buffer,0,BUFFER_SIZE);
+        puts(msg);
+        fgets(buffer,BUFFER_SIZE,stdin);
+        buffer[strcspn(buffer, "\n")] = 0;
+        for (i=BUFFER_SIZE-1;i>=0;--i)
+            if (!isdigit(buffer[i]) && buffer[i]!='.' && buffer[i]!=0 && buffer[i]!='-'){
+                isFloat = false;
+                puts("Klaida");
+                break;
+            }
+    }
+    while(!isFloat);
+    result = atof(buffer);
+    return result;
+}
+
 int main(){
-    int first_number,second_number;
-    first_number=get_int("Iveskite pirma skaiciu");
-    second_number=get_int("Iveskite antra skaiciu");
-    const int sum = first_number + second_number;
-    printf("%s%i\n","suma ",sum);
+    float first_number,second_number;
+    first_number=get_float("Iveskite pirma skaiciu");
+    second_number=get_float("Iveskite antra skaiciu");
+    const float sum = first_number + second_number;
+    printf("%s%f\n","suma ",sum);
     return 0;
 }
