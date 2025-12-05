@@ -4,7 +4,7 @@
 #include <stdbool.h>
 #include <ctype.h>
 
-int get_int(const char *msg){
+int get_int(const char *msg,const char *err_msg){
     const int BUFFER_SIZE =  100;
     bool isEqual = false;
     
@@ -20,13 +20,13 @@ int get_int(const char *msg){
         snprintf(buffer2,BUFFER_SIZE,"%i",result);
         isEqual=strcmp(buffer1,buffer2)==0;
         if (!isEqual)
-            puts("Klaida");
+            puts(err_msg);
     }
     while(!isEqual);
     return result;
 }
 
-double get_double(const char *msg){
+double get_double(const char *msg,const char *err_msg){
     const int BUFFER_SIZE = 100;
     bool isDouble;
     int i;
@@ -42,7 +42,7 @@ double get_double(const char *msg){
         for (i=BUFFER_SIZE-1;i>=0;--i)
             if (!isdigit(buffer[i]) && buffer[i]!='.' && buffer[i]!=0 && buffer[i]!='-'){
                 isDouble = false;
-                puts("Klaida");
+                puts(err_msg);
                 break;
             }
     }
@@ -53,8 +53,8 @@ double get_double(const char *msg){
 
 int main(){
     double first_number,second_number;
-    first_number=get_double("Iveskite pirma skaiciu");
-    second_number=get_double("Iveskite antra skaiciu");
+    first_number=get_double("Iveskite pirma skaiciu","Klaida");
+    second_number=get_double("Iveskite antra skaiciu","Klaida");
     const double sum = first_number + second_number;
     printf("%s%f\n","suma ",sum);
     return 0;
