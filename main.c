@@ -4,6 +4,8 @@
 #include <stdbool.h>
 #include <ctype.h>
 
+#define ARRAY_SIZE 1000
+
 int get_int(const char *msg,const char *err_msg){
     const int BUFFER_SIZE =  100;
     bool isEqual = false;
@@ -51,11 +53,58 @@ double get_double(const char *msg,const char *err_msg){
     return result;
 }
 
+void test3(int **val){
+    int i;
+    *val = malloc(sizeof(int)*ARRAY_SIZE);
+    for (i=0;i<ARRAY_SIZE;++i)
+        (*val)[i]=i*i;
+}
+
 int main(){
-    double first_number,second_number;
-    first_number=get_double("Iveskite pirma skaiciu","Klaida");
-    second_number=get_double("Iveskite antra skaiciu","Klaida");
-    const double sum = first_number + second_number;
-    printf("%s%f\n","suma ",sum);
+    int i,*test_value;
+    test3(&test_value);
+    for (i=0;i<ARRAY_SIZE;++i){
+        printf("%6i ",test_value[i]);
+        if (i % 10 == 0 && i!=0)
+            puts("");
+    }
+    free(test_value);
+}
+
+
+/*int get_file_statistics(const char *file_name,const int word_size, int **word_freq_stats){
+    FILE *data_file = fopen(file_name,"rb");
+    if (data_file == NULL)
+        return 1;
+    if (word_size < 1 || word_size > 16)
+        return 2;
+        
+    const int READ_BLOCK_SIZE = 4096;
+    const int WORD_COUNT = 1 << word_size;
+    int i;
+    char read_block[READ_BLOCK_SIZE];
+    memset(read_block,0,READ_BLOCK_SIZE);
+    
+    *word_freq_stats =(int**) malloc (sizeof(int*)*WORD_COUNT);
+  //  for (i=0;i<WORD_COUNT;++i)
+  //      *word_freq_stats[i]=1;
+   
+    fclose(data_file);
     return 0;
 }
+
+int main(){
+    int *word_freq_stats=NULL;
+    const int return_code = get_file_statistics("testas",2,&word_freq_stats);
+    if (return_code != 0){
+        printf("%s%i\n","funkcija grazino pabaigos koda ",return_code);
+        return return_code;
+    }
+    const int WORD_COUNT = 1 << 2;
+    int i;
+    
+    for (i=0;i<WORD_COUNT;++i)
+        printf("%i",word_freq_stats[i]);
+    free(word_freq_stats);
+    return 0;
+}*/
