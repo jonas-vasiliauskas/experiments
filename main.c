@@ -90,11 +90,12 @@ int get_file_statistics(const char *file_name,const int word_size, int **word_fr
         
         int bit_counter=0,word_value=0;
         for (i=0;i<byte_count*BITS_IN_BYTE;++i)
-            if (bit_counter<word_size){
+            if ((bit_counter+1)<word_size){
                 word_value=(word_value<<1)+expanded_read_block[i];
                 ++bit_counter;
             }
             else{
+                word_value=(word_value<<1)+expanded_read_block[i];
                 ++(*word_freq_stats)[word_value];
                 bit_counter=0;
                 word_value=0;
@@ -117,6 +118,7 @@ int main(){
     
     for (i=0;i<WORD_COUNT;++i)
         printf("%i ",word_freq_stats[i]);
+    puts("");
     free(word_freq_stats);
     return 0;
 }
