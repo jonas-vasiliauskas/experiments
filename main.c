@@ -61,7 +61,7 @@ void test3(int **val){
 }
 
 
-int get_file_statistics(const char *file_name,const int word_size, int **word_freq_stats){
+int get_file_statistics(const char *file_name,const unsigned int word_size, int **word_freq_stats){
     FILE *data_file = fopen(file_name,"rb");
     if (data_file == NULL)
         return 1;
@@ -73,7 +73,7 @@ int get_file_statistics(const char *file_name,const int word_size, int **word_fr
     const int EXPANDED_READ_BLOCK_SIZE = READ_BLOCK_SIZE*BITS_IN_BYTE;
     const int WORD_COUNT = 1 << word_size;
     int i,j,byte_count = READ_BLOCK_SIZE;
-    char read_block[READ_BLOCK_SIZE],expanded_read_block[EXPANDED_READ_BLOCK_SIZE];
+    unsigned char read_block[READ_BLOCK_SIZE],expanded_read_block[EXPANDED_READ_BLOCK_SIZE];
     
     *word_freq_stats =(int*) malloc (sizeof(int)*WORD_COUNT);
     if (word_freq_stats == NULL)
@@ -88,14 +88,14 @@ int get_file_statistics(const char *file_name,const int word_size, int **word_fr
             for (j=1;j<BITS_IN_BYTE;++j)
                 expanded_read_block[i*BITS_IN_BYTE+j]=(read_block[i]>>(BITS_IN_BYTE-j-1))%2;
         
-        int bit_counter=0,word_value=0;
+        unsigned int bit_counter=0,word_value=0;
         for (i=0;i<byte_count*BITS_IN_BYTE;++i)
             if ((bit_counter+1)<word_size){
                 word_value=(word_value<<1)+expanded_read_block[i];
                 ++bit_counter;
             }
             else{
-                word_value=(word_value<<1)+expanded_read_block[i];
+                word_value=(word_value*2)+expanded_read_block[i];
                 ++(*word_freq_stats)[word_value];
                 bit_counter=0;
                 word_value=0;
