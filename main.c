@@ -68,11 +68,11 @@ int get_file_statistics(const char *file_name,const unsigned int word_size, int 
     if (word_size < 1 || word_size > 16)
         return 2;
     
-    const int BITS_IN_BYTE = 8;    
-    const int READ_BLOCK_SIZE = 4096;
-    const int EXPANDED_READ_BLOCK_SIZE = READ_BLOCK_SIZE*BITS_IN_BYTE;
-    const int WORD_COUNT = 1 << word_size;
-    int i,j,byte_count = READ_BLOCK_SIZE;
+    const unsigned int BITS_IN_BYTE = 8;    
+    const unsigned int READ_BLOCK_SIZE = 4096;
+    const unsigned int EXPANDED_READ_BLOCK_SIZE = READ_BLOCK_SIZE*BITS_IN_BYTE;
+    const unsigned int WORD_COUNT = 1 << word_size;
+    unsigned int i,j,byte_count = READ_BLOCK_SIZE;
     unsigned char read_block[READ_BLOCK_SIZE],expanded_read_block[EXPANDED_READ_BLOCK_SIZE];
     
     *word_freq_stats =(int*) malloc (sizeof(int)*WORD_COUNT);
@@ -89,7 +89,11 @@ int get_file_statistics(const char *file_name,const unsigned int word_size, int 
                 expanded_read_block[i*BITS_IN_BYTE+j]=(read_block[i]>>(BITS_IN_BYTE-j-1))%2;
         
         unsigned int bit_counter=0,word_value=0;
-        for (i=0;i<byte_count*BITS_IN_BYTE;++i)
+        
+        const unsigned int WORD_COUNT=byte_count*BITS_IN_BYTE;
+        const unsigned int COMPLETE_WORD_COUNT = WORD_COUNT % word_size == 0?WORD_COUNT:WORD_COUNT-1;
+        
+        for (i=0;i<COMPLETE_WORD_COUNT;++i)
             if ((bit_counter+1)<word_size){
                 word_value=(word_value<<1)+expanded_read_block[i];
                 ++bit_counter;
@@ -100,20 +104,33 @@ int get_file_statistics(const char *file_name,const unsigned int word_size, int 
                 bit_counter=0;
                 word_value=0;
             }
+        if (COMPLETE_WORD_COUNT!=WORD_COUNT){    
+            for (i=COMPLETE_WORD_COUNT;i<WORD_COUNT;++i)
+                word_value=word_value*2;
+            ++(*word_freq_stats)[word_value];
+            bit_counter=0;
+            word_value=0;
+        }
     }
    
     fclose(data_file);
     return 0;
 }
 
-int main(){
+int main(int arg_c, char **arg_v){
+    if (arg_c != 3){
+        fprintf(stderr,"%s\n","Netinkamas parametru skaicius");
+        return 1;
+    }
     int *word_freq_stats=NULL;
-    const int return_code = get_file_statistics("testas",2,&word_freq_stats);
+    const int  WORD_SIZE = atoi(arg_v[2]);
+    const int WORD_COUNT = 1 << WORD_SIZE;
+    const int return_code = get_file_statistics(arg_v[1],WORD_SIZE,&word_freq_stats);
     if (return_code != 0){
-        printf("%s%i\n","funkcija grazino pabaigos koda ",return_code);
+        fprintf(stderr,"%s%i\n","funkcija grazino pabaigos koda ",return_code);
         return return_code;
     }
-    const int WORD_COUNT = 1 << 2;
+    
     int i;
     
     for (i=0;i<WORD_COUNT;++i)
