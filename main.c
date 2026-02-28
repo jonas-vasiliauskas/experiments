@@ -60,12 +60,16 @@ void test3(int **val){
         (*val)[i]=i*i;
 }
 
+typedef struct word_freq_stats_t{
+    int index;
+    int frequency;
+}word_freq_stats_t;
 
-int get_file_statistics(const char *file_name,const unsigned int word_size, int **word_freq_stats){
+int get_file_statistics(const char *file_name,const unsigned int word_size, word_freq_stats_t **word_freq_stats){
     FILE *data_file = fopen(file_name,"rb");
     if (data_file == NULL)
         return 1;
-    if (word_size < 1 || word_size > 16)
+    if (word_size < 2 || word_size > 16)
         return 2;
     
     const unsigned int BITS_IN_BYTE = 8;    
@@ -75,9 +79,11 @@ int get_file_statistics(const char *file_name,const unsigned int word_size, int 
     unsigned int i,j,byte_count = READ_BLOCK_SIZE;
     unsigned char read_block[READ_BLOCK_SIZE],expanded_read_block[EXPANDED_READ_BLOCK_SIZE];
     
-    *word_freq_stats =(int*) malloc (sizeof(int)*WORD_COUNT);
+    *word_freq_stats =(word_freq_stats_t*) malloc (sizeof(word_freq_stats_t)*WORD_COUNT);
     if (word_freq_stats == NULL)
         return 3;
+    for (i=0;i<WORD_COUNT;++i)
+        (*word_freq_stats)[i].index = i;  
         
     
     while (byte_count == READ_BLOCK_SIZE){
@@ -99,15 +105,15 @@ int get_file_statistics(const char *file_name,const unsigned int word_size, int 
                 ++bit_counter;
             }
             else{
-                word_value=(word_value*2)+expanded_read_block[i];
-                ++(*word_freq_stats)[word_value];
+                word_value=(word_value<<1)+expanded_read_block[i];
+                ++((*word_freq_stats)[word_value].frequency);
                 bit_counter=0;
                 word_value=0;
             }
         if (COMPLETE_WORD_COUNT!=WORD_COUNT){    
             for (i=COMPLETE_WORD_COUNT;i<WORD_COUNT;++i)
-                word_value=word_value*2;
-            ++(*word_freq_stats)[word_value];
+                word_value=word_value<<1;
+            ++((*word_freq_stats)[word_value].frequency);
             bit_counter=0;
             word_value=0;
         }
@@ -122,7 +128,7 @@ int main(int arg_c, char **arg_v){
         fprintf(stderr,"%s\n","Netinkamas parametru skaicius");
         return 1;
     }
-    int *word_freq_stats=NULL;
+    word_freq_stats_t *word_freq_stats=NULL;
     const int  WORD_SIZE = atoi(arg_v[2]);
     const int WORD_COUNT = 1 << WORD_SIZE;
     const int return_code = get_file_statistics(arg_v[1],WORD_SIZE,&word_freq_stats);
@@ -134,8 +140,7 @@ int main(int arg_c, char **arg_v){
     int i;
     
     for (i=0;i<WORD_COUNT;++i)
-        printf("%i ",word_freq_stats[i]);
-    puts("");
+        printf("%i %i\n",word_freq_stats[i].index,word_freq_stats[i].frequency);
     free(word_freq_stats);
     return 0;
 }
