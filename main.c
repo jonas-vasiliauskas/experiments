@@ -79,7 +79,7 @@ int get_file_statistics(const char *file_name,const unsigned int word_size, word
     unsigned int i,j,byte_count = READ_BLOCK_SIZE;
     unsigned char read_block[READ_BLOCK_SIZE],expanded_read_block[EXPANDED_READ_BLOCK_SIZE];
     
-    *word_freq_stats =(word_freq_stats_t*) malloc (sizeof(word_freq_stats_t)*WORD_COUNT);
+    *word_freq_stats =(word_freq_stats_t*) calloc (sizeof(word_freq_stats_t),WORD_COUNT);
     if (word_freq_stats == NULL)
         return 3;
     for (i=0;i<WORD_COUNT;++i)
@@ -123,6 +123,33 @@ int get_file_statistics(const char *file_name,const unsigned int word_size, word
     return 0;
 }
 
+typedef struct huffman_compression_item_t{
+    char *starting_bytes;
+    char *huffman_encoding;
+}huffman_compression_item_t;
+
+int comp(const void *first, const void *second){
+    const word_freq_stats_t *first_obj = (word_freq_stats_t*) first;
+    const word_freq_stats_t *second_obj = (word_freq_stats_t*) second;
+    return (first_obj->frequency-second_obj->frequency);
+}
+
+int get_huffman_compression_table(const int word_size, word_freq_stats_t *word_freq_stats,
+    huffman_compression_item_t **huffman_compression_items){
+    const unsigned int WORD_COUNT = 1 <<word_size;
+    if (word_freq_stats==NULL)
+        return 1;
+        
+    *huffman_compression_items =(huffman_compression_item_t*) malloc (sizeof(huffman_compression_item_t)*WORD_COUNT);
+    qsort(word_freq_stats,WORD_COUNT, sizeof(word_freq_stats[0]), comp);
+    puts("---------------------------------------------");
+    unsigned int i;
+    for (i=0;i<WORD_COUNT;++i)
+        printf("%i %i\n",word_freq_stats[i].index,word_freq_stats[i].frequency);
+    puts("---------------------------------------------");
+    return 0;
+}
+
 int main(int arg_c, char **arg_v){
     if (arg_c != 3){
         fprintf(stderr,"%s\n","Netinkamas parametru skaicius");
@@ -130,17 +157,20 @@ int main(int arg_c, char **arg_v){
     }
     word_freq_stats_t *word_freq_stats=NULL;
     const int  WORD_SIZE = atoi(arg_v[2]);
-    const int WORD_COUNT = 1 << WORD_SIZE;
+    //const int WORD_COUNT = 1 << WORD_SIZE;
     const int return_code = get_file_statistics(arg_v[1],WORD_SIZE,&word_freq_stats);
     if (return_code != 0){
         fprintf(stderr,"%s%i\n","funkcija grazino pabaigos koda ",return_code);
         return return_code;
     }
     
-    int i;
+    //int i;
     
-    for (i=0;i<WORD_COUNT;++i)
-        printf("%i %i\n",word_freq_stats[i].index,word_freq_stats[i].frequency);
+   // for (i=0;i<WORD_COUNT;++i)
+   //     printf("%i %i\n",word_freq_stats[i].index,word_freq_stats[i].frequency);
+    huffman_compression_item_t *huffman_compression_items=NULL;       
+    get_huffman_compression_table(WORD_SIZE,word_freq_stats,&huffman_compression_items);
     free(word_freq_stats);
+    free(huffman_compression_items);
     return 0;
 }
