@@ -7,8 +7,9 @@
 int task(bool *isRunning,const int sleepInMs,const int workInMs,int count){
    int i,c=0;
    time_t startTime = time(NULL);
-   while (*isRunning && (count > 0 || count != -1)){
-       --count;
+   while (*isRunning && count != 0){
+       if (count!=-1)
+           --count;
        time_t endTime=startTime;
        while (difftime(endTime,startTime)*1000<workInMs){
            for (i=0;i<1000;++i)
@@ -18,13 +19,13 @@ int task(bool *isRunning,const int sleepInMs,const int workInMs,int count){
        startTime = time(NULL);
        std::this_thread::sleep_for(std::chrono::milliseconds(sleepInMs));
    }
-   std::cout<<"Finished thread\n";
    return c;
 }
 
 void killerTask(bool *isRunning){
-    while (!(*isRunning)){
+    while (*isRunning){
         std::string inputOption;
+        std::cout<<"To exit enter letter 'q'\n";
         std::cin>>inputOption;
         if (inputOption=="q")
             *isRunning=false;
