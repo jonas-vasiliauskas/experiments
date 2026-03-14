@@ -19,6 +19,7 @@ int task(bool *isRunning,const int sleepInMs,const int workInMs,int count){
        startTime = time(NULL);
        std::this_thread::sleep_for(std::chrono::milliseconds(sleepInMs));
    }
+   
    return c;
 }
 
@@ -40,19 +41,27 @@ int main(int argC,char **argV){
     bool isRunning=true;
     const int CPU_COUNT = std::thread::hardware_concurrency();
     std::vector<std::thread> taskThreads;
-    const int SLEEP_IN_MS= std::stoi(argV[1])*1000;
-    const int WORK_IN_MS = std::stoi(argV[2])*1000;
-    const int REPETITION_COUNT = std::stoi(argV[3]);
+    try{
+        const int SLEEP_IN_MS= std::stoi(argV[1])*1000;
+        const int WORK_IN_MS = std::stoi(argV[2])*1000;
+        const int REPETITION_COUNT = std::stoi(argV[3]);
     
-    if (WORK_IN_MS <= SLEEP_IN_MS){
-        std::cerr<<"Work period must be longer than sleep one\n";
-        return 1;
-    }
+        if (WORK_IN_MS <= SLEEP_IN_MS){
+            std::cerr<<"Work period must be longer than sleep one\n";
+            return 1;
+        }
         
-    for (int i=0;i<CPU_COUNT;++i)
-        taskThreads.push_back(std::thread(task,&isRunning,SLEEP_IN_MS,WORK_IN_MS,REPETITION_COUNT));
-    std::thread killerThread(killerTask,&isRunning);
-    for (int i=0;i<CPU_COUNT;++i)
-        taskThreads[i].join();
-    killerThread.join();        
+        std::thread killerThread(killerTask,&isRunning);
+        for (int i=0;i<CPU_COUNT;++i)
+            taskThreads.push_back(std::thread(task,&isRunning,SLEEP_IN_MS,WORK_IN_MS,REPETITION_COUNT));
+        
+        for (int i=0;i<CPU_COUNT;++i)
+            taskThreads[i].join();
+            
+        killerThread.join();
+    }
+    catch (std::invalid_argument &ia){
+        std::cerr<<"Invalid argument "<<"\n";
+        return 1;
+    }        
 }
