@@ -34,17 +34,17 @@ void killerTask(bool *isRunning){
 }
 
 int main(int argC,char **argV){
-    if (argC!=4){
+    if (argC!=5){
          std::cerr<<"Wrong argument count\n";
          return 1;
     }
     bool isRunning=true;
-    const int CPU_COUNT = std::thread::hardware_concurrency();
     std::vector<std::thread> taskThreads;
     try{
         const int SLEEP_IN_MS= std::stoi(argV[1])*1000;
         const int WORK_IN_MS = std::stoi(argV[2])*1000;
         const int REPETITION_COUNT = std::stoi(argV[3]);
+        const int CPU_COUNT = std::thread::hardware_concurrency()*std::stoi(argV[4]);
     
         if (WORK_IN_MS <= SLEEP_IN_MS){
             std::cerr<<"Work period must be longer than sleep one\n";
